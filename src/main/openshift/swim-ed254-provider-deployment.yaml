@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: swim-ed254-provider
+  namespace: swim-demo
+  labels:
+    app: swim-ed254-provider
+    app.kubernetes.io/part-of: swim-ed254
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: swim-ed254-provider
+  template:
+    metadata:
+      labels:
+        app: swim-ed254-provider
+    spec:
+      containers:
+      - name: swim-ed254-provider
+        image: quay.io/masales/swim-ed254-provider:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+          name: http
+        - containerPort: 8443
+          protocol: TCP
+          name: https
+        envFrom:
+        - configMapRef:
+            name: swim-ed254-provider-config
+        - secretRef:
+            name: swim-ed254-provider-secret
+        - secretRef:
+            name: swim-ed254-provider-oidc-secret
+        resources:
+          requests:
+            memory: 256Mi
+            cpu: 250m
+          limits:
+            memory: 512Mi
+            cpu: 500m
+        volumeMounts:
+        - name: server-cert
+          mountPath: /certs/server
+          readOnly: true
+        - name: ca-cert
+          mountPath: /certs/ca
+          readOnly: true
+        livenessProbe:
+          httpGet:
+            path: /q/health/live
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /q/health/ready
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 2
+          timeoutSeconds: 3
+          failureThreshold: 3
+      volumes:
+      - name: server-cert
+        secret:
+          secretName: swim-ed254-provider-server-tls
+      - name: ca-cert
+        configMap:
+          name: swim-ca-bundle

@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: swim-ed254-provider-config
+  namespace: swim-demo
+  labels:
+    app: swim-ed254-provider
+    component: configuration
+    app.kubernetes.io/part-of: swim-ed254
+data:
+  POSTGRES_HOST: provider-postgres.swim-demo.svc.cluster.local
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: ed254_provider
+
+  AMQP_HOST: provider-artemis-hdls-svc.swim-demo.svc.cluster.local
+  AMQP_PORT: "5672"
+
+  ARTEMIS_BROKER_NAME: provider-artemis
+  ARTEMIS_JMX_HOST: provider-artemis-jmx-svc.swim-demo.svc.cluster.local
+  ARTEMIS_JMX_PORT: "1099"
+
+  KAFKA_BOOTSTRAP_SERVERS: kafka-kafka-bootstrap.swim-demo.svc.cluster.local:9092
+
+  QUARKUS_HTTP_PORT: "8080"
+  INTERNAL_PORT: "9080"
+  LOG_LEVEL: INFO
+  OTEL_ENABLED: "true"
+  OTEL_ENDPOINT: "http://tempo-tempo-distributor.central-observability.svc.cluster.local:4318/v1/traces"
+  OTEL_HEADERS: ""
+  PROMETHEUS_ENABLED: "true"
+
+  OPENAPI_SERVERS: "https://swim-ed254-provider-swim-demo.apps.ocp4.masales.cloud"
