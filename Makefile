@@ -113,12 +113,10 @@ native: native-amd64 native-arm64 manifest push
 # ─── Quality ─────────────────────────────────────────────────────────────────
 
 sonar:
-	@test -n "$(SONAR_TOKEN)" || { echo "Usage: make sonar SONAR_TOKEN=<token>"; \
-		echo "Start SonarQube with swim-developer-tools: make sonar-up"; exit 1; }
 	./mvnw clean verify sonar:sonar \
 		-DskipITs=false \
 		-Dsonar.host.url=$(SONAR_URL) \
-		-Dsonar.login=$(SONAR_TOKEN) \
+		$(if $(SONAR_TOKEN),-Dsonar.login=$(SONAR_TOKEN),) \
 		-Dsonar.projectKey=$(IMAGE) \
 		-Dsonar.projectName=$(IMAGE)
 
