@@ -1,24 +1,29 @@
 # swim-ed254-provider — Knowledge Base
 
-
 ## What This Is
 
-**ATSU/AISP role.** Publishes ED-254 (EUROCAE) Arrival Sequence data to downstream ANSP consumers via AMQP 1.0. Same framework and REST API shape as DNOTAM provider, different data model (FIXM 4.3) and additional ED-254-specific endpoints.
+**ATSU/AISP role.** Publishes ED-254 (EUROCAE) Arrival Sequence data to downstream ANSP consumers via AMQP 1.0. Built on the swim-developer-framework; implements only ED-254-specific domain logic.
 
 ~66 classes. 30 unit + 20 integration tests.
 
-## Differences vs DNOTAM Provider
+## Standard
 
-| Aspect | DNOTAM Provider | ED-254 Provider |
-|--------|-----------------|-----------------|
-| Data model | AIXM 5.1.1 | FIXM 4.3 |
-| Standard | SWIM Registry / SPEC-170 | EUROCAE ED-254 |
-| Kafka input | 6 DNOTAM topics | `ed254-arrival-sequence-topic`, `ed254-provider-exception-topic` |
-| Extra endpoints | — | `CommunicateProblems`, `UnsubscriptionResponse` (ED-254 conformance) |
+**EUROCAE ED-254** — Arrival Sequence Service Performance Standard.
+
+Protocol requirements: EUROCONTROL SPEC-170 (SWIM-TI Yellow Profile) — AMQP 1.0 over TLS 1.3, REST/HTTP.
 
 ## REST API
 
-Same structure as DNOTAM provider (`/swim/v1/subscriptions`, `/swim/v1/topics`, `/swim/v1/features`) plus ED-254-specific conformance endpoints.
+| Endpoint | Description |
+|----------|-------------|
+| `POST /swim/v1/subscriptions` | Create subscription |
+| `GET /swim/v1/subscriptions/{id}` | Get subscription |
+| `PUT /swim/v1/subscriptions/{id}` | Update subscription (ACTIVE/PAUSED) |
+| `DELETE /swim/v1/subscriptions/{id}` | Delete subscription |
+| `GET /swim/v1/topics` | List available topics |
+| `GET /swim/v1/features` | WFS GetFeature |
+| `POST /swim/v1/communicate-problems` | ED-254 conformance endpoint |
+| `POST /swim/v1/unsubscription-response` | ED-254 conformance endpoint |
 
 ## Architecture
 
@@ -26,15 +31,34 @@ Same structure as DNOTAM provider (`/swim/v1/subscriptions`, `/swim/v1/topics`, 
 com.github.swim_developer.ed254.provider
 ├── domain/model/        Subscription, Topic, ArrivalSequence
 ├── application/usecase/ Subscription and event use cases
-└── infrastructure/      (rest, scheduling, persistence/PostgreSQL, amqp, kafka, artemis)
+└── infrastructure/      rest, scheduling, persistence/PostgreSQL, amqp, kafka, artemis
 ```
 
-## Framework Wiring
+## Data Model
 
-Same as DNOTAM provider. Replace `dnotam` with `ed254` in class names.
+**FIXM 4.3** — Flight Information Exchange Model, ED-254 extension.
 
-| Framework Class | Usage |
-|-----------------|--------|
+Dependency: `swim-fixm-model-ed254`
+
+## Kafka Topics (input)
+
+| Topic | Purpose |
+|-------|---------|
+| `ed254-arrival-sequence-topic` | Incoming arrival sequence events |
+| `ed254-provider-exception-topic` | Exception/DLQ events |
+
+## Framework SPIs Implemented
+
+| SPI | Implementation |
+|-----|---------------|
+| `SwimSubscription<E>` | Subscription contract + filter logic |
+| `SwimPayloadValidator` | ED-254 / FIXM XSD validation |
+| `SwimIngressHandler` | Kafka ingestion |
+
+## Framework Components Used
+
+| Class | Usage |
+|-------|-------|
 | `AbstractEventDeliveryService` | Load subscriptions → filter → publish to AMQP |
 | `AbstractAmqpPublisher` | Artemis AMQP publishing |
 | `PerSubscriptionHeartbeatScheduler` | Heartbeat to `{queue}.heartbeat` |
@@ -51,8 +75,8 @@ Same as DNOTAM provider. Replace `dnotam` with `ed254` in class names.
 ```bash
 cd ../swim-developer-framework && mvn clean install -DskipTests
 ./mvnw clean package -DskipTests
-quarkus dev
+./mvnw quarkus:dev
 ./mvnw verify -DskipITs=false
 ```
 
-Local infra: `podman compose up -d` (requires a compose.yml with Kafka, MongoDB/PostgreSQL, Artemis — see repo root)`
+Local infra: `podman compose up -d` (see repo root `compose.yml`)
