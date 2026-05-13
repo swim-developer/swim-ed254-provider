@@ -44,8 +44,6 @@ make sync
 
 **NEVER use** `-Dmaven.test.skip=true` (skips test compilation). Always use `-DskipTests`.
 
-**NEVER use** `docker` — this project uses **Podman** exclusively.
-
 ## Architecture
 
 Hexagonal (ports and adapters) inside `com.github.swim_developer.ed254.provider`:
@@ -90,16 +88,8 @@ Run `make sync` to clone and install all, or `make deps` to see the order.
 - HTTP/API tests use **RestAssured** for requests and **AssertJ** for assertions
 - Integration tests bind host ports — run ONE project at a time, never in parallel
 
-## Non-Negotiable Rules
+## Key Rules
 
-- **NEVER delete or disable production code to make tests pass.** Investigate the real defect. Ask the user if unsure.
-- **NEVER take design decisions autonomously.** Always ask before changing patterns, class hierarchies, or architectural choices.
-- **NEVER use Java Reflection** (no `Field.setAccessible`, no reflective injection) — not in production, not in tests.
-- **No inner classes.** Every class must be in its own file.
-- **Max 400 lines per file** (except .md files). Refactor if exceeded.
-- **Logging: use `@Slf4j` (Lombok) only.** Never `LoggerFactory.getLogger()`.
-- **No comments in code** unless explaining a non-obvious constraint.
-- **No AI authorship trailers in commits.** The sole author is the human developer.
 - **Naming must be unambiguous.** Always qualify names to differentiate from siblings (e.g., `swim-ed254-provider`, not `swim-provider`).
 
 ## Quarkus Profiles
