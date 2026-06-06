@@ -1,0 +1,20 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: swim-ed254-provider-mtls
+  namespace: swim-demo
+  labels:
+    app: swim-ed254-provider
+    app.kubernetes.io/part-of: swim-ed254
+  annotations:
+    haproxy.router.openshift.io/timeout: 60s
+spec:
+  host: swim-ed254-provider-mtls.apps.ocp4.masales.cloud
+  to:
+    kind: Service
+    name: swim-ed254-provider
+  port:
+    targetPort: https
+  tls:
+    termination: passthrough
+    insecureEdgeTerminationPolicy: Redirect

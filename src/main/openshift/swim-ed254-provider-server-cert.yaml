@@ -1,0 +1,22 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: swim-ed254-provider-server
+  namespace: swim-demo
+  labels:
+    app: swim-ed254-provider
+    app.kubernetes.io/part-of: swim-ed254
+spec:
+  secretName: swim-ed254-provider-server-tls
+  issuerRef:
+    name: swim-ca-issuer
+    kind: ClusterIssuer
+  commonName: swim-ed254-provider.apps.ocp4.masales.cloud
+  dnsNames:
+    - swim-ed254-provider.apps.ocp4.masales.cloud
+    - swim-ed254-provider.swim-demo.svc.cluster.local
+  usages:
+    - server auth
+  privateKey:
+    algorithm: RSA
+    size: 2048

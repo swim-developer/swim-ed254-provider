@@ -1,0 +1,18 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: swim-ed254-provider-http
+  namespace: swim-demo
+  labels:
+    app: swim-ed254-provider
+    app.kubernetes.io/part-of: swim-ed254
+spec:
+  host: swim-ed254-provider-http.apps.ocp4.masales.cloud
+  to:
+    kind: Service
+    name: swim-ed254-provider
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
